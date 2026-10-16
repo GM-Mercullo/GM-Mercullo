@@ -21,6 +21,10 @@ export interface Project {
   githubUrl: string;
   demoUrl?: string;
   imageUrl: string;
+  mediaType?: 'image' | 'video';
+  mediaAutoplay?: boolean;
+  mediaLoop?: boolean;
+  mediaPosterUrl?: string;
   isFeatured: boolean;
   category: 'networking' | 'software' | 'tool' | 'web';
   verifiedCapabilities?: string;

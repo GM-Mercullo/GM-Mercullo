@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Project } from '../../types';
 import { audioFx } from '../../utils/audioFx';
+import { getProjectImageUrl, getProjectVideoUrl, isDirectVideoUrl } from '../../utils/imageUrls';
 import {
   Sparkles,
   ExternalLink,
@@ -34,6 +35,45 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+
+  const renderProjectMedia = (project: Project, className: string) => {
+    const isVideo = project.mediaType === 'video';
+    const autoplay = Boolean(project.mediaAutoplay);
+    const loop = Boolean(project.mediaLoop);
+    const poster = project.mediaPosterUrl && project.mediaPosterUrl.length > 0 ? project.mediaPosterUrl : undefined;
+
+    if (isVideo && isDirectVideoUrl(project.imageUrl)) {
+      return (
+        <video
+          src={project.imageUrl}
+          className={className}
+          controls
+          muted={autoplay}
+          autoPlay={autoplay}
+          loop={loop}
+          playsInline
+          preload="metadata"
+          poster={poster}
+        />
+      );
+    }
+
+    if (isVideo) {
+      let src = getProjectVideoUrl(project.imageUrl);
+      if (autoplay) src += (src.includes('?') ? '&' : '?') + 'autoplay=1';
+      return (
+        <iframe
+          src={src}
+          title={`${project.title} preview`}
+          className={className}
+          allow="autoplay; fullscreen"
+          allowFullScreen
+        />
+      );
+    }
+
+    return <img src={getProjectImageUrl(project.imageUrl)} alt={project.title} className={className} />;
+  };
 
   // Primary featured project (e.g., NetworkLabApp)
   const featuredProject = projects.find((p) => p.isFeatured) || projects[0];
@@ -98,11 +138,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
                 
                 {/* Visual / Screenshot Column */}
                 <div className="lg:col-span-6 relative min-h-[280px] lg:min-h-full bg-[#080F19] overflow-hidden border-b lg:border-b-0 lg:border-r border-[#D8C697] dark:border-[#34475A]">
-                  <img
-                    src={featuredProject.imageUrl}
-                    alt={featuredProject.title}
-                    className="w-full h-full object-cover opacity-90 hover:scale-105 transition-transform duration-700"
-                  />
+                  {renderProjectMedia(featuredProject, 'w-full h-full object-cover opacity-90 hover:scale-105 transition-transform duration-700')}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
 
                   {/* Featured Badge */}
@@ -293,11 +329,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
               >
                 {/* Image */}
                 <div className="relative h-44 w-full overflow-hidden bg-black/40 border-b border-[#D8C697] dark:border-[#34475A]">
-                  <img
-                    src={project.imageUrl}
-                    alt={project.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
+                  {renderProjectMedia(project, 'w-full h-full object-cover group-hover:scale-105 transition-transform duration-500')}
                   <div className="absolute top-3 left-3 px-2.5 py-0.5 rounded-md bg-[#080F19]/90 border border-[#34475A] text-[11px] text-[#F0E8D5] flex items-center gap-1">
                     {getCategoryIcon(project.category)}
                     <span className="capitalize">{project.category}</span>

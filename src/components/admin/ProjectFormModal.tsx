@@ -24,6 +24,10 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
     githubUrl: '',
     demoUrl: '',
     imageUrl: '',
+    mediaType: 'image',
+    mediaAutoplay: false,
+    mediaLoop: false,
+    mediaPosterUrl: '',
     isFeatured: false,
     category: 'software',
     verifiedCapabilities: '',
@@ -47,6 +51,10 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
         githubUrl: 'https://github.com/GM-Mercullo/',
         demoUrl: '',
         imageUrl: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&q=80&w=900',
+        mediaType: 'image',
+        mediaAutoplay: false,
+        mediaLoop: false,
+        mediaPosterUrl: '',
         isFeatured: false,
         category: 'software',
         verifiedCapabilities: '',
@@ -82,6 +90,10 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
       githubUrl: formData.githubUrl?.trim() || 'https://github.com/GM-Mercullo',
       demoUrl: formData.demoUrl?.trim() || '',
       imageUrl: formData.imageUrl?.trim() || 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&q=80&w=900',
+      mediaType: formData.mediaType || 'image',
+      mediaAutoplay: Boolean(formData.mediaAutoplay),
+      mediaLoop: Boolean(formData.mediaLoop),
+      mediaPosterUrl: formData.mediaPosterUrl?.trim() || '',
       isFeatured: Boolean(formData.isFeatured),
       category: formData.category || 'software',
       verifiedCapabilities: formData.verifiedCapabilities?.trim() || '',
@@ -217,14 +229,62 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
 
             <div>
               <label className="block text-xs font-heading font-bold uppercase tracking-wider text-[#702C38] dark:text-[#C5A66A] mb-1">
-                Image / Screenshot URL
+                Featured Photo / Video URL
               </label>
+              <div className="flex gap-2">
+                <select
+                  value={formData.mediaType}
+                  onChange={(e) => setFormData({ ...formData, mediaType: e.target.value as Project['mediaType'] })}
+                  className="w-28 shrink-0 px-2 py-2 bg-[#E8D9AE]/60 dark:bg-[#080F19] border border-[#D8C697] dark:border-[#34475A] rounded-xl focus:outline-none focus:border-[#702C38]"
+                >
+                  <option value="image">Photo</option>
+                  <option value="video">Video</option>
+                </select>
               <input
                 type="url"
                 value={formData.imageUrl}
                 onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
                 className="w-full px-3.5 py-2 bg-[#E8D9AE]/60 dark:bg-[#080F19] border border-[#D8C697] dark:border-[#34475A] rounded-xl focus:outline-none focus:border-[#702C38] font-mono text-xs"
               />
+              </div>
+              <p className="mt-1 text-[11px] text-[#75664B] dark:text-[#B7C1CC]">
+                Share the individual Drive file as <strong>Anyone with the link</strong>. For videos, use a public Drive file link or a direct MP4/WebM/Ogg URL. A folder link cannot display media by itself.
+              </p>
+
+              <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
+                <label className="flex items-center gap-2 text-xs">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(formData.mediaAutoplay)}
+                    onChange={(e) => setFormData({ ...formData, mediaAutoplay: e.target.checked })}
+                    className="w-4 h-4"
+                  />
+                  <span className="font-heading font-bold">Autoplay</span>
+                </label>
+
+                <label className="flex items-center gap-2 text-xs">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(formData.mediaLoop)}
+                    onChange={(e) => setFormData({ ...formData, mediaLoop: e.target.checked })}
+                    className="w-4 h-4"
+                  />
+                  <span className="font-heading font-bold">Loop</span>
+                </label>
+
+                <div className="sm:col-span-3">
+                  <label className="block text-xs font-heading font-bold uppercase tracking-wider text-[#702C38] dark:text-[#C5A66A] mb-1">
+                    Poster Image URL (Optional)
+                  </label>
+                  <input
+                    type="url"
+                    placeholder="Optional poster image for videos (jpg/png)"
+                    value={formData.mediaPosterUrl}
+                    onChange={(e) => setFormData({ ...formData, mediaPosterUrl: e.target.value })}
+                    className="w-full px-3.5 py-2 bg-[#E8D9AE]/60 dark:bg-[#080F19] border border-[#D8C697] dark:border-[#34475A] rounded-xl focus:outline-none focus:border-[#702C38] font-mono text-xs"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 

@@ -81,7 +81,7 @@ export const ExperienceFormModal: React.FC<ExperienceFormModalProps> = ({
             <Compass className="w-4 h-4" /> {initialExperience ? 'Edit Career Milestone' : 'Add Experience Entry'}
           </div>
           <h2 className="text-2xl font-heading font-bold mt-1">
-            {initialExperience ? initialExperience.position : 'Chapter 4 Experience Entry'}
+            {initialExperience ? initialExperience.position : 'Chapter 3 Experience Entry'}
           </h2>
         </div>
 

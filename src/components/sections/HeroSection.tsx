@@ -1,38 +1,61 @@
 import React from 'react';
 import { Profile } from '../../types';
 import { audioFx } from '../../utils/audioFx';
-import { Sparkles, ArrowDown, FileText, Code2, Shield, Network, Mail } from 'lucide-react';
+import {
+  FileText,
+  Code2,
+  Shield,
+  Network,
+  Mail,
+} from 'lucide-react';
+import type { ChapterPath } from '../../routes';
 
 interface HeroSectionProps {
   profile: Profile;
   onOpenResumeModal: () => void;
   onOpenAdmin: () => void;
+  onNavigate: (path: ChapterPath) => void;
 }
 
 export const HeroSection: React.FC<HeroSectionProps> = ({
   profile,
   onOpenResumeModal,
   onOpenAdmin,
+  onNavigate,
 }) => {
+  const navigateFromLink = (
+    event: React.MouseEvent<HTMLAnchorElement>,
+    path: ChapterPath,
+  ) => {
+    if (
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+    audioFx.playPaperRustle();
+    onNavigate(path);
+  };
+
   return (
-    <section id="hero" className="relative pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden">
-      
+    <section
+      id="hero"
+      className="relative pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden"
+    >
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 z-10 bg-[#f6eed9]/30 backdrop-blur-[2px] dark:hidden"
+      />
+
       {/* Soft Background Ambiance */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-amber-500/10 dark:bg-amber-400/5 blur-[140px] pointer-events-none" />
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20 text-center">
-        
-        {/* Wax Seal Badge */}
-        <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-[#E8D9AE]/80 dark:bg-[#111D2B] border border-[#D8C697] dark:border-[#34475A] shadow-sm mb-6">
-          <div className="w-5 h-5 rounded-full bg-[#702C38] border border-[#B49A62] text-[#F4E9C8] font-heading font-bold text-[10px] flex items-center justify-center">
-            GM
-          </div>
-          <span className="font-heading font-bold text-xs uppercase tracking-widest text-[#702C38] dark:text-[#C5A66A]">
-            Enchanted Developer Portfolio
-          </span>
-          <span className="w-1.5 h-1.5 rounded-full bg-[#B49A62] animate-pulse" />
-        </div>
-
         {/* Main Title & Headline */}
         <h1 className="text-4xl sm:text-6xl md:text-7xl font-heading font-bold text-[#302B22] dark:text-[#F0E8D5] tracking-tight leading-none mb-4">
           GM Mercullo
@@ -54,8 +77,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               <Code2 className="w-4 h-4" />
             </div>
             <div>
-              <div className="font-heading font-bold text-sm text-[#302B22] dark:text-[#F0E8D5]">Software Engineering</div>
-              <div className="text-xs text-[#75664B] dark:text-[#B7C1CC]">Python, React, JavaScript, C/C++</div>
+              <div className="font-heading font-bold text-sm text-[#302B22] dark:text-[#F0E8D5]">
+                Software Engineering
+              </div>
+              <div className="text-xs text-[#75664B] dark:text-[#B7C1CC]">
+                Python, React, JavaScript, C/C++
+              </div>
             </div>
           </div>
 
@@ -64,8 +91,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               <Network className="w-4 h-4" />
             </div>
             <div>
-              <div className="font-heading font-bold text-sm text-[#302B22] dark:text-[#F0E8D5]">Network Engineering</div>
-              <div className="text-xs text-[#75664B] dark:text-[#B7C1CC]">Subnetting, OSI 7-Layer, Wireshark</div>
+              <div className="font-heading font-bold text-sm text-[#302B22] dark:text-[#F0E8D5]">
+                Network Engineering
+              </div>
+              <div className="text-xs text-[#75664B] dark:text-[#B7C1CC]">
+                Subnetting, OSI 7-Layer, Wireshark
+              </div>
             </div>
           </div>
 
@@ -74,23 +105,18 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               <Shield className="w-4 h-4" />
             </div>
             <div>
-              <div className="font-heading font-bold text-sm text-[#302B22] dark:text-[#F0E8D5]">Cybersecurity</div>
-              <div className="text-xs text-[#75664B] dark:text-[#B7C1CC]">Network Defense, Vulnerability Audit</div>
+              <div className="font-heading font-bold text-sm text-[#302B22] dark:text-[#F0E8D5]">
+                Cybersecurity
+              </div>
+              <div className="text-xs text-[#75664B] dark:text-[#B7C1CC]">
+                Network Defense, Vulnerability Audit
+              </div>
             </div>
           </div>
         </div>
 
         {/* Action Buttons */}
         <div className="flex flex-wrap items-center justify-center gap-3">
-          <a
-            href="#projects"
-            onClick={() => audioFx.playPaperRustle()}
-            className="px-6 py-3 rounded-xl bg-[#702C38] hover:bg-[#8A3645] text-[#F4E9C8] font-heading font-bold text-sm tracking-wider shadow flex items-center gap-2 transition-all transform hover:-translate-y-0.5"
-          >
-            <Sparkles className="w-4 h-4 text-[#B49A62]" />
-            <span>Enter The Great Hall</span>
-          </a>
-
           <button
             onClick={onOpenResumeModal}
             className="px-5 py-3 rounded-xl bg-[#E8D9AE] dark:bg-[#111D2B] border border-[#D8C697] dark:border-[#34475A] text-[#302B22] dark:text-[#F0E8D5] hover:border-[#B49A62] font-heading font-semibold text-sm flex items-center gap-2 transition-colors shadow-sm"
@@ -100,8 +126,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </button>
 
           <a
-            href="#contact"
-            onClick={() => audioFx.playPaperRustle()}
+            href="/owl-post"
+            onClick={(event) => navigateFromLink(event, '/owl-post')}
             className="px-5 py-3 rounded-xl bg-transparent border border-[#B49A62]/60 hover:border-[#B49A62] text-[#702C38] dark:text-[#C5A66A] font-heading font-semibold text-sm flex items-center gap-2 transition-colors"
           >
             <Mail className="w-4 h-4" />
@@ -112,14 +138,13 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         {/* Scroll indicator */}
         <div className="mt-16 flex justify-center">
           <a
-            href="#projects"
-            className="text-xs font-decorative italic text-[#75664B] dark:text-[#B7C1CC] hover:text-[#702C38] dark:hover:text-[#8CCBFF] flex flex-col items-center gap-1 transition-colors"
+            href="/great-hall"
+            onClick={(event) => navigateFromLink(event, '/great-hall')}
+            className="text-sm font-decorative italic text-[#75664B] dark:text-[#B7C1CC] hover:text-[#702C38] dark:hover:text-[#8CCBFF] transition-colors"
           >
-            <span>Proceed to Chapter 2</span>
-            <ArrowDown className="w-3.5 h-3.5 animate-bounce" />
+            <span>Enter the Great Hall</span>
           </a>
         </div>
-
       </div>
     </section>
   );

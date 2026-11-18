@@ -1,7 +1,7 @@
 import React from 'react';
 import { Profile } from '../../types';
 import { audioFx } from '../../utils/audioFx';
-import { KeyRound, Mail, Code2, Globe, ExternalLink } from 'lucide-react';
+import { Mail, Code2, Globe } from 'lucide-react';
 
 interface FooterProps {
   profile: Profile;
@@ -17,9 +17,7 @@ export const Footer: React.FC<FooterProps> = ({
   return (
     <footer className="relative border-t border-[#D8C697] dark:border-[#34475A] bg-[#E8D9AE]/80 dark:bg-[#080F19] pt-14 pb-12 z-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
         <div className="flex flex-col md:flex-row items-center justify-between gap-8 pb-10 border-b border-[#D8C697] dark:border-[#34475A]">
-          
           {/* Brand */}
           <div className="text-center md:text-left">
             <div className="flex items-center justify-center md:justify-start gap-3">
@@ -31,7 +29,8 @@ export const Footer: React.FC<FooterProps> = ({
               </span>
             </div>
             <p className="text-xs font-decorative italic text-[#75664B] dark:text-[#B7C1CC] mt-1 max-w-sm">
-              "The magic establishes your identity. Your work demonstrates your abilities."
+              "The magic establishes your identity. Your work demonstrates your
+              abilities."
             </p>
           </div>
 
@@ -68,40 +67,44 @@ export const Footer: React.FC<FooterProps> = ({
               <span>LinkedIn</span>
             </a>
           </div>
-
         </div>
 
         {/* Bottom Bar with Secret Alohomora Door */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs font-sans text-[#75664B] dark:text-[#B7C1CC] gap-4">
           <div className="flex items-center gap-2">
-            <span>© {new Date().getFullYear()} GM Mercullo —</span>
-            <button
-              onClick={onReopenInvitation}
-              className="hover:text-[#702C38] dark:hover:text-[#C5A66A] underline font-heading"
-            >
-              The Invitation
-            </button>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <button
+            <span
+              role="button"
+              tabIndex={0}
+              title="GM Mercullo"
+              className="cursor-pointer select-none"
               onClick={() => {
                 audioFx.playAlohomora();
                 onOpenAdmin();
               }}
-              className="hover:text-[#702C38] dark:hover:text-[#C5A66A] flex items-center gap-1.5 font-heading text-xs font-bold transition-colors"
-              title="Open Admin CMS"
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  audioFx.playAlohomora();
+                  onOpenAdmin();
+                }
+              }}
             >
-              <KeyRound className="w-3.5 h-3.5 text-[#B49A62]" />
-              <span>Alohomora CMS</span>
+              © {new Date().getFullYear()} GM Mercullo —
+            </span>
+            <button
+              onClick={onReopenInvitation}
+              className="hover:text-[#702C38] dark:hover:text-[#C5A66A] underline font-heading"
+            >
+              Replay Owl Post
             </button>
-            <span>•</span>
+          </div>
+
+          <div className="flex items-center">
             <span className="font-decorative italic">
               Every story begins with an invitation.
             </span>
           </div>
         </div>
-
       </div>
     </footer>
   );

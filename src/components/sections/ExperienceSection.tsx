@@ -25,7 +25,7 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E8D9AE] dark:bg-[#111D2B] border border-[#D8C697] dark:border-[#34475A] text-xs font-heading font-semibold text-[#702C38] dark:text-[#C5A66A] uppercase tracking-wider mb-2">
-              <Compass className="w-3.5 h-3.5" /> Chapter 4 — The Path So Far
+              <Compass className="w-3.5 h-3.5" /> Chapter 3 — The Path So Far
             </div>
             <h2 className="text-3xl sm:text-4xl font-heading font-bold text-[#302B22] dark:text-[#F0E8D5]">
               Real Practical Experience

@@ -5,12 +5,16 @@ class MagicalAudio {
   private soundEnabled: boolean = true;
 
   constructor() {
-    this.soundEnabled = localStorage.getItem('hogwarts_sound_enabled') !== 'false';
+    this.soundEnabled =
+      localStorage.getItem('hogwarts_sound_enabled') !== 'false';
   }
 
   private initCtx() {
     if (!this.ctx && typeof window !== 'undefined') {
-      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      const AudioCtx =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext })
+          .webkitAudioContext;
       if (AudioCtx) {
         this.ctx = new AudioCtx();
       }
@@ -44,7 +48,7 @@ class MagicalAudio {
       this.initCtx();
       if (!this.ctx) return;
       const now = this.ctx.currentTime;
-      const freqs = [523.25, 659.25, 783.99, 1046.50, 1318.51]; // C5, E5, G5, C6, E6
+      const freqs = [523.25, 659.25, 783.99, 1046.5, 1318.51]; // C5, E5, G5, C6, E6
 
       freqs.forEach((freq, index) => {
         if (!this.ctx) return;
@@ -146,7 +150,10 @@ class MagicalAudio {
 
       const gain = this.ctx.createGain();
       gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.18);
+      gain.gain.exponentialRampToValueAtTime(
+        0.001,
+        this.ctx.currentTime + 0.18,
+      );
 
       noise.connect(filter);
       filter.connect(gain);
@@ -189,7 +196,8 @@ class MagicalAudio {
       this.initCtx();
       if (!this.ctx) return;
       const now = this.ctx.currentTime;
-      [1567.98, 2093.00, 2637.02].forEach((freq, i) => { // G6, C7, E7
+      [1567.98, 2093.0, 2637.02].forEach((freq, i) => {
+        // G6, C7, E7
         if (!this.ctx) return;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
@@ -243,7 +251,7 @@ class MagicalAudio {
       if (!this.ctx) return;
       const now = this.ctx.currentTime;
       // Silvery celestial major 9th chord (D4, A4, F#5, C#6, E6)
-      const freqs = [293.66, 440.00, 739.99, 1108.73, 1318.51];
+      const freqs = [293.66, 440.0, 739.99, 1108.73, 1318.51];
       freqs.forEach((freq) => {
         if (!this.ctx) return;
         const osc = this.ctx.createOscillator();
@@ -296,7 +304,7 @@ class MagicalAudio {
       this.initCtx();
       if (!this.ctx) return;
       const now = this.ctx.currentTime;
-      const notes = [587.33, 739.99, 880.00, 1174.66, 1479.98, 1760.00]; // D5, F#5, A5, D6, F#6, A6
+      const notes = [587.33, 739.99, 880.0, 1174.66, 1479.98, 1760.0]; // D5, F#5, A5, D6, F#6, A6
       notes.forEach((freq, idx) => {
         if (!this.ctx) return;
         const osc = this.ctx.createOscillator();
@@ -405,7 +413,10 @@ class MagicalAudio {
         osc.type = 'sine';
         const startFreq = i === 0 ? 1200 : 1600;
         osc.frequency.setValueAtTime(startFreq, now + offset);
-        osc.frequency.exponentialRampToValueAtTime(startFreq * 1.3, now + offset + 0.1);
+        osc.frequency.exponentialRampToValueAtTime(
+          startFreq * 1.3,
+          now + offset + 0.1,
+        );
         gain.gain.setValueAtTime(0.08, now + offset);
         gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.12);
         osc.connect(gain);

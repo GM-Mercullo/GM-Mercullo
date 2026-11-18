@@ -48,7 +48,7 @@ export const InvitationScreen: React.FC<InvitationScreenProps> = ({
         {/* Cinematic Headline */}
         <div className="mb-8 space-y-2">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#111D2B] border border-[#34475A] text-[#C5A66A] text-xs font-heading tracking-widest uppercase shadow">
-            <Sparkles className="w-3.5 h-3.5 text-[#B49A62]" /> Chapter 1 — The Invitation
+            <Sparkles className="w-3.5 h-3.5 text-[#B49A62]" /> Owl Post Invitation
           </div>
           <h1 className="text-3xl sm:text-5xl font-heading font-semibold text-[#F0E8D5] tracking-tight">
             Every story begins with an invitation.
@@ -168,7 +168,7 @@ export const InvitationScreen: React.FC<InvitationScreenProps> = ({
               {/* Entry Button */}
               <div className="mt-6 pt-4 border-t border-[#D8C697] flex items-center justify-between">
                 <span className="text-xs font-decorative italic text-[#75664B]">
-                  Turn the page to Chapter 2: The Great Hall
+                  Turn the page to Chapter 1: The Great Hall
                 </span>
 
                 <button

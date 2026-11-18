@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { storage } from '../../services/storageService';
 import { audioFx } from '../../utils/audioFx';
 import {
   Sun,
@@ -7,17 +6,17 @@ import {
   Volume2,
   VolumeX,
   Wand2,
-  KeyRound,
   Menu,
   X,
   Mail,
-  BookOpen
+  BookOpen,
 } from 'lucide-react';
+import type { ChapterPath } from '../../routes';
 
 interface NavbarProps {
   currentTheme: 'light' | 'dark';
+  onNavigate: (path: ChapterPath) => void;
   onToggleTheme: () => void;
-  onOpenAdmin: () => void;
   onReopenInvitation: () => void;
   wandEnabled: boolean;
   onToggleWand: () => void;
@@ -25,33 +24,23 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({
   currentTheme,
+  onNavigate,
   onToggleTheme,
-  onOpenAdmin,
   onReopenInvitation,
   wandEnabled,
   onToggleWand,
 }) => {
   const [soundOn, setSoundOn] = useState(audioFx.isEnabled());
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
-    const checkUnread = () => {
-      const messages = storage.getMessages();
-      setUnreadCount(messages.filter((m) => !m.read).length);
-    };
-
-    checkUnread();
-    window.addEventListener('portfolio_data_changed', checkUnread);
-
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 30);
     };
     window.addEventListener('scroll', handleScroll);
 
     return () => {
-      window.removeEventListener('portfolio_data_changed', checkUnread);
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
@@ -61,15 +50,35 @@ export const Navbar: React.FC<NavbarProps> = ({
     setSoundOn(newState);
   };
 
-  const navChapters = [
-    { name: 'The Great Hall', href: '#projects' },
-    { name: 'The Map', href: '#about' },
-    { name: 'The Path', href: '#experience' },
-    { name: 'Credentials', href: '#credentials' },
-    { name: 'Spellbook', href: '#skills' },
-    { name: 'Patronus Forest', href: '#learning' },
-    { name: 'Owl Post', href: '#contact' },
+  const navChapters: { name: string; href: ChapterPath }[] = [
+    { name: 'Home', href: '/' },
+    { name: 'The Great Hall', href: '/great-hall' },
+    { name: 'The Map', href: '/map' },
+    { name: 'The Path', href: '/path' },
+    { name: 'Credentials', href: '/credentials' },
+    { name: 'Spellbook', href: '/spellbook' },
+    { name: 'Patronus Forest', href: '/patronus-forest' },
+    { name: 'Owl Post', href: '/owl-post' },
   ];
+
+  const navigateToChapter = (
+    event: React.MouseEvent<HTMLAnchorElement>,
+    path: ChapterPath,
+  ) => {
+    if (
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+    audioFx.playPaperRustle();
+    onNavigate(path);
+  };
 
   return (
     <header
@@ -81,7 +90,6 @@ export const Navbar: React.FC<NavbarProps> = ({
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
-          
           {/* Logo with Wax Seal GM Monogram */}
           <a
             href="#hero"
@@ -107,7 +115,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <a
                 key={ch.name}
                 href={ch.href}
-                onClick={() => audioFx.playPaperRustle()}
+                onClick={(event) => navigateToChapter(event, ch.href)}
                 className="px-2.5 py-1.5 rounded-lg text-xs font-sans font-medium text-[#75664B] dark:text-[#B7C1CC] hover:text-[#702C38] dark:hover:text-[#8CCBFF] hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
               >
                 {ch.name}
@@ -117,7 +125,6 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Magical Utilities & Admin Door */}
           <div className="hidden sm:flex items-center gap-2">
-            
             {/* Replay Invitation */}
             <button
               onClick={onReopenInvitation}
@@ -131,7 +138,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Theme Toggle (Light / Dark) */}
             <button
               onClick={onToggleTheme}
-              title={currentTheme === 'dark' ? "Switch to Light Theme (The Enchanted Library)" : "Switch to Dark Theme (The Midnight Library)"}
+              title={
+                currentTheme === 'dark'
+                  ? 'Switch to Light Theme (The Enchanted Library)'
+                  : 'Switch to Dark Theme (The Midnight Library)'
+              }
               className="p-2 rounded-lg bg-[#E8D9AE]/60 dark:bg-[#111D2B] border border-[#D8C697] dark:border-[#34475A] text-[#75664B] dark:text-[#B7C1CC] hover:text-[#302B22] dark:hover:text-white transition-colors"
             >
               {currentTheme === 'dark' ? (
@@ -144,16 +155,22 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Audio Toggle */}
             <button
               onClick={handleToggleSound}
-              title={soundOn ? "Mute Arcane Audio" : "Unmute Arcane Audio"}
+              title={soundOn ? 'Mute Arcane Audio' : 'Unmute Arcane Audio'}
               className="p-2 rounded-lg bg-[#E8D9AE]/60 dark:bg-[#111D2B] border border-[#D8C697] dark:border-[#34475A] text-[#75664B] dark:text-[#B7C1CC] hover:text-[#302B22] dark:hover:text-white transition-colors"
             >
-              {soundOn ? <Volume2 className="w-4 h-4 text-[#B49A62]" /> : <VolumeX className="w-4 h-4 text-red-400" />}
+              {soundOn ? (
+                <Volume2 className="w-4 h-4 text-[#B49A62]" />
+              ) : (
+                <VolumeX className="w-4 h-4 text-red-400" />
+              )}
             </button>
 
             {/* Wand Sparks Toggle */}
             <button
               onClick={onToggleWand}
-              title={wandEnabled ? "Deactivate Wand Sparks" : "Activate Wand Sparks"}
+              title={
+                wandEnabled ? 'Deactivate Wand Sparks' : 'Activate Wand Sparks'
+              }
               className={`p-2 rounded-lg border transition-colors ${
                 wandEnabled
                   ? 'bg-[#702C38]/10 dark:bg-[#111D2B] border-[#B49A62] text-[#B49A62]'
@@ -163,46 +180,21 @@ export const Navbar: React.FC<NavbarProps> = ({
               <Wand2 className="w-4 h-4" />
             </button>
 
-            {/* Secret Alohomora Admin Door */}
-            <button
-              onClick={onOpenAdmin}
-              title="Alohomora CMS: Manage Projects, Credentials, Skills & Owls"
-              className="relative px-3.5 py-1.5 rounded-lg bg-[#702C38] hover:bg-[#8A3645] border border-[#B49A62] text-[#F4E9C8] text-xs font-heading font-bold tracking-wide flex items-center gap-1.5 shadow-[0_2px_10px_rgba(112,44,56,0.3)] transition-all transform hover:-translate-y-0.5"
-            >
-              <KeyRound className="w-3.5 h-3.5 text-[#B49A62]" />
-              <span>Admin Room</span>
-              {unreadCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-600 text-white font-sans text-[10px] font-bold flex items-center justify-center animate-bounce shadow">
-                  {unreadCount}
-                </span>
-              )}
-            </button>
-
           </div>
 
           {/* Mobile Actions */}
           <div className="flex sm:hidden items-center gap-2">
             <button
-              onClick={onOpenAdmin}
-              className="p-2 rounded-lg bg-[#702C38] border border-[#B49A62] text-[#F4E9C8] relative"
-              title="Admin Chamber"
-            >
-              <KeyRound className="w-4 h-4 text-[#B49A62]" />
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-600 text-white text-[9px] font-bold flex items-center justify-center">
-                  {unreadCount}
-                </span>
-              )}
-            </button>
-
-            <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 rounded-lg bg-[#E8D9AE] dark:bg-[#111D2B] border border-[#D8C697] dark:border-[#34475A] text-[#302B22] dark:text-[#F0E8D5]"
             >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {mobileMenuOpen ? (
+                <X className="w-5 h-5" />
+              ) : (
+                <Menu className="w-5 h-5" />
+              )}
             </button>
           </div>
-
         </div>
       </div>
 
@@ -214,9 +206,9 @@ export const Navbar: React.FC<NavbarProps> = ({
               <a
                 key={ch.name}
                 href={ch.href}
-                onClick={() => {
+                onClick={(event) => {
                   setMobileMenuOpen(false);
-                  audioFx.playPaperRustle();
+                  navigateToChapter(event, ch.href);
                 }}
                 className="px-3 py-2 rounded-lg text-sm font-sans text-[#302B22] dark:text-[#F0E8D5] hover:bg-black/5 dark:hover:bg-white/5"
               >
@@ -239,13 +231,21 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={onToggleTheme}
                 className="p-2 rounded-lg bg-[#E8D9AE] dark:bg-[#111D2B] border border-[#D8C697] dark:border-[#34475A]"
               >
-                {currentTheme === 'dark' ? <Sun className="w-4 h-4 text-amber-300" /> : <Moon className="w-4 h-4 text-[#702C38]" />}
+                {currentTheme === 'dark' ? (
+                  <Sun className="w-4 h-4 text-amber-300" />
+                ) : (
+                  <Moon className="w-4 h-4 text-[#702C38]" />
+                )}
               </button>
               <button
                 onClick={handleToggleSound}
                 className="p-2 rounded-lg bg-[#E8D9AE] dark:bg-[#111D2B] border border-[#D8C697] dark:border-[#34475A]"
               >
-                {soundOn ? <Volume2 className="w-4 h-4 text-[#B49A62]" /> : <VolumeX className="w-4 h-4 text-red-400" />}
+                {soundOn ? (
+                  <Volume2 className="w-4 h-4 text-[#B49A62]" />
+                ) : (
+                  <VolumeX className="w-4 h-4 text-red-400" />
+                )}
               </button>
               <button
                 onClick={onToggleWand}

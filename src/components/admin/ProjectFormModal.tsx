@@ -119,7 +119,7 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
             <Sparkles className="w-4 h-4" /> {initialProject ? 'Edit Application' : 'Add New Application'}
           </div>
           <h2 id="project-modal-title" className="text-2xl font-heading font-bold mt-1">
-            {initialProject ? initialProject.title : 'Chapter 2 Project Entry'}
+            {initialProject ? initialProject.title : 'Chapter 1 Project Entry'}
           </h2>
         </div>
 

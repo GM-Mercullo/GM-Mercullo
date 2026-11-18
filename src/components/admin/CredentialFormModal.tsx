@@ -84,7 +84,7 @@ export const CredentialFormModal: React.FC<CredentialFormModalProps> = ({
             <Award className="w-4 h-4" /> {initialCredential ? 'Edit Qualification' : 'Add Credential'}
           </div>
           <h2 className="text-2xl font-heading font-bold mt-1">
-            {initialCredential ? initialCredential.name : 'Chapter 5 Credential Entry'}
+            {initialCredential ? initialCredential.name : 'Chapter 4 Credential Entry'}
           </h2>
         </div>
 

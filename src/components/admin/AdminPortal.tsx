@@ -9,7 +9,6 @@ import { CredentialFormModal } from './CredentialFormModal';
 import { SkillFormModal } from './SkillFormModal';
 import { LearningFormModal } from './LearningFormModal';
 import {
-  X,
   Lock,
   Unlock,
   KeyRound,
@@ -108,7 +107,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ isOpen, onClose }) => 
       setAuthError('');
       setPasscode('');
     } else {
-      setAuthError('Incorrect spell incantation. (Hint: The default passcode is "alohomora")');
+      setAuthError('Incorrect spell incantation.');
       audioFx.playIncendio();
     }
   };
@@ -262,21 +261,12 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ isOpen, onClose }) => 
             {isAuthenticated && (
               <button
                 onClick={handleLogout}
-                className="px-3 py-1.5 rounded-xl bg-transparent border border-[#702C38]/40 hover:border-[#702C38] text-[#702C38] dark:text-[#F0E8D5] text-xs font-heading font-bold flex items-center gap-1.5 transition-colors"
+                className="px-3 py-1.5 rounded-xl bg-[#702C38] hover:bg-[#8A3645] border border-[#B49A62] text-[#F4E9C8] text-xs font-heading font-bold flex items-center gap-1.5 transition-colors"
               >
                 <LogOut className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Logout</span>
+                <span>Logout</span>
               </button>
             )}
-
-            <button
-              onClick={onClose}
-              aria-label="Close admin portal"
-              className="p-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10 text-[#75664B] dark:text-[#B7C1CC]"
-              title="Close Admin Chamber"
-            >
-              <X className="w-5 h-5" />
-            </button>
           </div>
         </div>
 
@@ -322,7 +312,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ isOpen, onClose }) => 
                     type="password"
                     autoFocus
                     autoComplete="current-password"
-                    placeholder={isSupabaseConfigured ? 'Enter your Supabase password...' : 'Enter local demo passcode...'}
+                    placeholder={isSupabaseConfigured ? 'Enter your password...' : 'Enter passcode...'}
                     value={passcode}
                     onChange={(e) => setPasscode(e.target.value)}
                     className="w-full pl-10 pr-4 py-3 bg-[#F4E9C8] dark:bg-[#111D2B] border border-[#D8C697] dark:border-[#34475A] rounded-xl text-sm font-mono text-center focus:outline-none focus:border-[#702C38] shadow-inner"
@@ -343,21 +333,6 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ isOpen, onClose }) => 
                   <span>Alohomora! (Unlock Chamber)</span>
                 </button>
               </form>
-
-              {/* Helpful Hint Card */}
-              <div className="p-3.5 rounded-xl bg-[#F4E9C8] dark:bg-[#111D2B] border border-[#D8C697] dark:border-[#34475A] text-left text-xs font-sans text-[#75664B] dark:text-[#B7C1CC] space-y-1">
-                <div className="text-[#702C38] dark:text-[#C5A66A] font-heading font-bold text-[11px] flex items-center gap-1">
-                  <Sparkles className="w-3.5 h-3.5" /> Passcode Note:
-                </div>
-                {isSupabaseConfigured ? (
-                  <div className="text-[11px] italic">Authentication is managed by Supabase. Passwords are never stored in this browser.</div>
-                ) : (
-                  <>
-                    <div>Local demo passcode: <code className="font-mono font-bold text-[#702C38] dark:text-[#8CCBFF] bg-black/5 dark:bg-white/10 px-1.5 py-0.5 rounded">alohomora</code></div>
-                    <div className="text-[11px] italic">Configure Supabase before deploying; local demo mode is not secure.</div>
-                  </>
-                )}
-              </div>
 
             </div>
           </div>

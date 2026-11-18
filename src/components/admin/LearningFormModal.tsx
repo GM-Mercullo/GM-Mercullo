@@ -81,7 +81,7 @@ export const LearningFormModal: React.FC<LearningFormModalProps> = ({
             <Sparkles className="w-4 h-4" /> {initialEntry ? 'Edit Growth Record' : 'Record Growth Entry'}
           </div>
           <h2 className="text-2xl font-heading font-bold mt-1">
-            {initialEntry ? initialEntry.title : 'Chapter 7 Patronus Forest Entry'}
+            {initialEntry ? initialEntry.title : 'Chapter 6 Patronus Forest Entry'}
           </h2>
         </div>
 

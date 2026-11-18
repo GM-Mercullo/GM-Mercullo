@@ -1,322 +1,425 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { audioFx } from '../../utils/audioFx';
 import { triggerLibrarySparks } from '../../utils/magicFx';
-import { Sparkles, MailOpen, ArrowRight, BookOpen, Scroll, CheckCircle2, X } from 'lucide-react';
+import './HogwartsAcceptanceLetter.css';
 
 interface HogwartsAcceptanceLetterProps {
   onOpenPortfolio: () => void;
   onSkip: () => void;
+  playIntroVideo: boolean;
 }
 
-export const HogwartsAcceptanceLetter: React.FC<HogwartsAcceptanceLetterProps> = ({
-  onOpenPortfolio,
-  onSkip,
-}) => {
-  const [isOpened, setIsOpened] = useState(false);
-  const [activePage, setActivePage] = useState<'letter' | 'equipment'>('letter');
+type InvitationStep = 'front' | 'back' | 'opening' | 'letter';
 
-  const handleBreakSeal = () => {
-    audioFx.playWaxSealCrack();
-    triggerLibrarySparks({ x: 0.5, y: 0.5 });
-    setIsOpened(true);
+export const HogwartsAcceptanceLetter: React.FC<
+  HogwartsAcceptanceLetterProps
+> = ({ onOpenPortfolio, onSkip, playIntroVideo }) => {
+  const [step, setStep] = useState<InvitationStep>('front');
+  const [isEnvelopeVisible, setIsEnvelopeVisible] = useState(!playIntroVideo);
+  const [isExiting, setIsExiting] = useState(false);
+  const openingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const exitTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const introVideoRef = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(
+    () => () => {
+      if (openingTimeout.current) clearTimeout(openingTimeout.current);
+      if (exitTimeout.current) clearTimeout(exitTimeout.current);
+    },
+    [],
+  );
+
+  const turnEnvelope = () => {
+    if (step !== 'front') return;
+    audioFx.playPaperRustle();
+    setStep('back');
   };
 
-  const handleEnterPortfolio = () => {
+  const revealEnvelope = () => {
+    introVideoRef.current?.pause();
+    setIsEnvelopeVisible(true);
+  };
+
+  const handleIntroVideoError = () => {
+    console.error(
+      'Unable to load the Owl Post intro video at /Intro-letter.mp4.',
+    );
+    revealEnvelope();
+  };
+
+  const breakSeal = () => {
+    if (step !== 'back') return;
+    audioFx.playWaxSealCrack();
+    triggerLibrarySparks({ x: 0.5, y: 0.5 });
+    setStep('opening');
+    openingTimeout.current = setTimeout(() => setStep('letter'), 1520);
+  };
+
+  const replayEnvelope = () => {
+    if (openingTimeout.current) clearTimeout(openingTimeout.current);
+    audioFx.playPaperRustle();
+    setStep('front');
+  };
+
+  const enterPortfolio = () => {
+    if (isExiting) return;
     audioFx.playAlohomora();
+    setIsExiting(true);
     onOpenPortfolio();
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/90 backdrop-blur-md overflow-y-auto animate-fadeIn select-none">
-      
-      {/* Background Magical Atmosphere */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[650px] rounded-full bg-amber-600/15 blur-[140px]" />
-        <div className="absolute bottom-10 right-1/4 w-[400px] h-[400px] rounded-full bg-[#702C38]/20 blur-[110px]" />
-      </div>
+  const skipInvitation = () => {
+    if (isExiting) return;
+    setIsExiting(true);
+    exitTimeout.current = setTimeout(onSkip, 400);
+  };
 
-      <div className="relative w-full max-w-2xl my-auto text-center z-10">
-        
-        {/* Top Banner Tag */}
-        <div className="mb-4 inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#111D2B]/90 border border-[#34475A] text-[#C5A66A] text-xs font-heading tracking-widest uppercase shadow">
-          <Sparkles className="w-3.5 h-3.5 text-[#B49A62]" /> Chapter 1 — The Hogwarts Acceptance Letter
+  const isLetterVisible = step === 'letter';
+
+  return (
+    <div
+      className={`invitation-shell${playIntroVideo ? ' has-intro-video' : ''}${isExiting ? ' is-exiting' : ''}`}
+    >
+      {playIntroVideo && (
+        <>
+          <video
+            ref={introVideoRef}
+            className="intro-video"
+            src="/Intro-letter.mp4"
+            autoPlay
+            muted
+            playsInline
+            aria-hidden="true"
+            onEnded={revealEnvelope}
+            onError={handleIntroVideoError}
+          />
+          <div
+            className={`invitation-vignette${isEnvelopeVisible ? ' is-visible' : ''}`}
+            aria-hidden="true"
+          />
+          {!isEnvelopeVisible && (
+            <button
+              type="button"
+              className="intro-skip-button"
+              onClick={revealEnvelope}
+            >
+              Skip Intro
+            </button>
+          )}
+        </>
+      )}
+
+      <div
+        className={`invitation-content${isEnvelopeVisible ? ' is-visible' : ' is-video-intro'}`}
+        aria-hidden={!isEnvelopeVisible}
+        inert={!isEnvelopeVisible}
+      >
+        <div className="invitation-ambient-glow" aria-hidden="true" />
+        <div className="invitation-dust" aria-hidden="true">
+          {Array.from({ length: 28 }, (_, index) => (
+            <span
+              key={index}
+              style={{
+                left: `${(index * 37) % 100}%`,
+                top: `${(index * 53) % 100}%`,
+                animationDelay: `-${(index % 9) * 0.7}s`,
+                animationDuration: `${6 + (index % 5)}s`,
+              }}
+            />
+          ))}
         </div>
 
-        {!isOpened ? (
-          /* ==================================================================== */
-          /* THE ENVELOPE (CLOSED WITH BURGUNDY WAX SEAL)                         */
-          /* ==================================================================== */
-          <div className="space-y-4">
-            
-            <h1 className="text-3xl sm:text-4xl font-heading font-bold text-[#F0E8D5] tracking-tight">
-              An Owl Has Delivered a Letter For You.
-            </h1>
-            <p className="text-xs sm:text-sm font-sans text-[#B7C1CC] max-w-md mx-auto">
-              Delivered via screech owl directly to your display from the digital archives of GM Mercullo.
-            </p>
+        <header className="invitation-header">
+          <h1>GM Mercullo</h1>
+        </header>
 
-            {/* The Physical Envelope */}
-            <div 
-              onClick={handleBreakSeal}
-              className="cursor-pointer group relative mx-auto w-full max-w-lg bg-[#E8D9AE] border-2 border-[#B49A62] rounded-3xl p-6 sm:p-10 shadow-[0_20px_60px_rgba(0,0,0,0.8)] hover:shadow-[0_25px_70px_rgba(180,154,98,0.35)] transition-all duration-300 transform hover:-translate-y-1.5 overflow-hidden"
-              style={{
-                backgroundImage: `
-                  radial-gradient(circle at 50% 20%, rgba(244, 233, 200, 0.7) 0%, rgba(216, 198, 151, 0.9) 100%)
-                `,
-              }}
-            >
-              {/* Postal Cancellation Postmark Stamp */}
-              <div className="absolute top-4 right-4 sm:top-6 sm:right-6 border-2 border-dashed border-[#702C38]/40 rounded-full w-20 h-20 sm:w-24 sm:h-24 flex flex-col items-center justify-center text-[9px] sm:text-[10px] font-heading text-[#702C38]/60 transform rotate-12 select-none pointer-events-none">
-                <span className="font-bold">OWL POST</span>
-                <span>HOGSMEADE</span>
-                <span className="text-[8px]">EXPRESS</span>
-              </div>
-
-              {/* Envelope Flap Crease Overlay */}
-              <div className="absolute top-0 left-0 right-0 h-1/2 border-b border-[#B49A62]/40 pointer-events-none" />
-
-              {/* Front Address in Authentic Emerald Green Ink Calligraphy */}
-              <div className="text-left font-heading text-[#114522] space-y-1 sm:space-y-1.5 my-6 sm:my-8 pl-4 sm:pl-8 border-l-2 border-[#114522]/30">
-                <div className="text-lg sm:text-xl font-bold tracking-wide italic">
-                  To: Esteemed Visitor & Tech Scout
-                </div>
-                <div className="text-sm sm:text-base">
-                  The Desk by the Window
-                </div>
-                <div className="text-sm sm:text-base">
-                  The Enchanted Library & Systems Citadel
-                </div>
-                <div className="text-xs sm:text-sm font-semibold tracking-wider uppercase text-[#702C38]">
-                  Diagon Alley / The Digital Realm
-                </div>
-              </div>
-
-              {/* Burgundy Wax Seal with GM Monogram */}
-              <div className="relative z-10 flex flex-col items-center justify-center pt-2">
-                <div 
-                  className="w-20 h-20 rounded-full bg-[#702C38] border-2 border-[#B49A62] shadow-[0_4px_25px_rgba(112,44,56,0.7)] flex items-center justify-center transform group-hover:scale-110 transition-transform relative"
-                  title="Click to Break Wax Seal"
-                >
-                  <div className="w-16 h-16 rounded-full border border-[#B49A62]/60 flex flex-col items-center justify-center text-[#F4E9C8] font-heading font-bold select-none">
-                    <span className="text-xl tracking-wider leading-none">GM</span>
-                    <span className="text-[8px] uppercase tracking-widest text-[#B49A62] mt-0.5">HOGWARTS</span>
-                  </div>
-                  {/* Subtle seal shine */}
-                  <div className="absolute top-1 left-2 w-4 h-2 rounded-full bg-white/20 blur-[0.5px]" />
-                </div>
-
-                <div className="mt-4 font-heading font-bold text-sm text-[#702C38] tracking-wide flex items-center gap-1.5 animate-pulse">
-                  <MailOpen className="w-4 h-4" />
-                  <span>Click Seal to Break & Unfold Acceptance Letter</span>
-                </div>
-              </div>
-
-            </div>
-
-            {/* Quick Skip Button */}
-            <div className="pt-2">
-              <button
-                type="button"
-                onClick={onSkip}
-                className="text-xs font-sans text-[#B7C1CC] hover:text-white underline transition-colors"
-              >
-                Skip Introduction and Go Straight to The Great Hall →
-              </button>
-            </div>
-
-          </div>
-        ) : (
-          /* ==================================================================== */
-          /* THE UNFOLDED HOGWARTS ACCEPTANCE LETTER                              */
-          /* ==================================================================== */
-          <div className="relative bg-[#F7EED4] text-[#11381E] border-2 border-[#B49A62] rounded-3xl p-6 sm:p-10 shadow-[0_25px_80px_rgba(0,0,0,0.9)] text-left font-serif animate-seal-pop max-h-[85vh] flex flex-col overflow-hidden">
-            
-            {/* Top Close Button */}
+        <main className="invitation-scene">
+          <div
+            className={`owl-envelope${step !== 'front' ? ' is-flipped' : ''}${step === 'opening' ? ' is-opening flap-open letter-sliding' : ''}`}
+            aria-label="Owl Post invitation envelope"
+          >
             <button
-              onClick={onSkip}
-              className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-black/10 text-[#75664B] transition-colors"
-              title="Close Letter"
+              type="button"
+              className="owl-envelope-face owl-envelope-front parchment-surface"
+              onClick={turnEnvelope}
+              aria-label="Turn over the invitation envelope"
+              tabIndex={step === 'front' ? 0 : -1}
             >
-              <X className="w-5 h-5" />
+              <span className="envelope-address">
+                <span className="emerald-calligraphy">Esteemed Visitor</span>
+                <span className="emerald-serif">
+                  The Glowing Screen <i>by the</i> Desk,
+                </span>
+                <span className="emerald-serif">
+                  Port 443, The Digital Realm,
+                </span>
+                <span className="emerald-serif">Worldwide Web.</span>
+              </span>
             </button>
 
-            {/* Letter Pages Navigation Tabs */}
-            <div className="flex items-center gap-2 pb-3 border-b border-[#D8C697] mb-4 print:hidden">
+            <div className="owl-envelope-face owl-envelope-back">
+              <div className="envelope-pocket" />
+              <div className="rising-letter-preview" aria-hidden="true">
+                <Crest className="preview-crest" />
+                <div>
+                  <p className="emerald-calligraphy">Dear Esteemed Visitor,</p>
+                  <p className="typewriter-text">
+                    I am pleased to invite you to explore my portfolio of
+                    Software Development, Networking, and Cybersecurity...
+                  </p>
+                </div>
+              </div>
+              <div className="envelope-side-flaps" aria-hidden="true">
+                <span className="flap-left" />
+                <span className="flap-right" />
+                <span className="flap-bottom" />
+              </div>
+              <div className="envelope-top-flap" aria-hidden="true">
+                <div className="envelope-top-shape">
+                  <Crest className="envelope-crest" />
+                </div>
+              </div>
               <button
-                onClick={() => {
-                  audioFx.playPaperRustle();
-                  setActivePage('letter');
-                }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-heading font-bold flex items-center gap-1.5 transition-colors ${
-                  activePage === 'letter'
-                    ? 'bg-[#702C38] text-[#F4E9C8] shadow'
-                    : 'bg-[#E8D9AE] text-[#302B22] hover:bg-[#D8C697]'
-                }`}
+                type="button"
+                className={`wax-seal${step === 'opening' ? ' is-broken' : ''}`}
+                onClick={breakSeal}
+                disabled={step !== 'back'}
+                aria-label="Break the crimson wax seal to open the letter"
               >
-                <Scroll className="w-3.5 h-3.5" />
-                <span>Page 1: Official Acceptance Letter</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  audioFx.playPaperRustle();
-                  setActivePage('equipment');
-                }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-heading font-bold flex items-center gap-1.5 transition-colors ${
-                  activePage === 'equipment'
-                    ? 'bg-[#702C38] text-[#F4E9C8] shadow'
-                    : 'bg-[#E8D9AE] text-[#302B22] hover:bg-[#D8C697]'
-                }`}
-              >
-                <BookOpen className="w-3.5 h-3.5" />
-                <span>Page 2: Equipment & Requirements</span>
+                <WaxSeal />
               </button>
             </div>
+          </div>
 
-            {/* Scrollable Parchment Content */}
-            <div className="overflow-y-auto pr-2 space-y-5 text-sm sm:text-base leading-relaxed">
-              
-              {activePage === 'letter' ? (
-                /* PAGE 1: THE LETTER */
-                <div className="space-y-4">
-                  {/* Hogwarts School Header */}
-                  <div className="text-center pb-4 border-b border-[#D8C697] space-y-1">
-                    <div className="w-12 h-12 mx-auto rounded-full bg-[#702C38] border border-[#B49A62] text-[#F4E9C8] font-heading font-bold text-lg flex items-center justify-center shadow">
-                      GM
-                    </div>
-                    <h2 className="text-xl sm:text-2xl font-heading font-bold text-[#702C38] tracking-widest uppercase">
-                      Hogwarts School of Codecraft & Wizardry
-                    </h2>
-                    <div className="text-xs font-heading font-semibold text-[#526746]">
-                      (The Digital Engineering Archives of GM Mercullo)
-                    </div>
-                    <div className="text-[11px] font-sans text-[#75664B] italic">
-                      Headmaster: Albus Dumbledore &middot; Order of Merlin, First Class &middot; Supreme Mugwump
-                    </div>
-                  </div>
+          <div className="invitation-prompt" aria-live="polite">
+            <p className="invitation-prompt-pill">
+              {step === 'front' && 'Click envelope to turn over'}
+              {step === 'back' && 'Click the wax seal to break'}
+              {step === 'opening' && 'Unfolding your invitation…'}
+              {step === 'letter' && 'Your invitation has been opened'}
+            </p>
+            {step !== 'letter' && (
+              <p>
+                {step === 'front' && 'Addressed to you via Owl Post'}
+                {step === 'back' && 'Sealed with the Crest of Hogwarts'}
+                {step === 'opening' && 'A letter is being prepared for you'}
+              </p>
+            )}
+          </div>
 
-                  {/* Letter Salutation & Body in Emerald Green Ink */}
-                  <div className="space-y-3 font-heading text-[#114522] text-sm sm:text-base">
-                    <p className="font-bold text-base sm:text-lg">
-                      Dear Esteemed Visitor,
-                    </p>
+          <button
+            type="button"
+            className="invitation-skip"
+            onClick={skipInvitation}
+          >
+            Skip introduction and go straight to the Great Hall{' '}
+            <span aria-hidden="true">→</span>
+          </button>
+        </main>
 
-                    <p>
-                      We are pleased to inform you that you have been granted an official invitation to explore the enchanted developer portfolio and technical citadel of <strong>GM Mercullo</strong>.
-                    </p>
-
-                    <p>
-                      Enclosed within these chapters you will find a full account of software artifacts, verified packet-level educational networking tools (such as <em>NetworkLabApp</em>), media synchronizers, Android ecosystem utilities, and verified cybersecurity credentials.
-                    </p>
-
-                    <p>
-                      Term begins immediately upon entering the Great Hall. We await your inspection by no later than today.
-                    </p>
-                  </div>
-
-                  {/* Signatures */}
-                  <div className="pt-4 border-t border-[#D8C697] flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 font-heading">
-                    <div>
-                      <div className="text-xs text-[#75664B] uppercase tracking-wider">
-                        Yours Sincerely,
-                      </div>
-                      <div className="text-lg font-bold text-[#702C38] italic font-decorative mt-1">
-                        Minerva McGonagall
-                      </div>
-                      <div className="text-xs text-[#526746]">
-                        Deputy Headmistress & Keeper of Arcane Keys
-                      </div>
-                    </div>
-
-                    <div className="sm:text-right">
-                      <div className="text-xs text-[#75664B] uppercase tracking-wider">
-                        Countersigned in Living Ink:
-                      </div>
-                      <div className="text-lg font-bold text-[#114522] font-decorative mt-1">
-                        GM Mercullo
-                      </div>
-                      <div className="text-xs text-[#75664B]">
-                        Aspiring Software Developer &middot; Network Engineer &middot; Cybersecurity Analyst
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                /* PAGE 2: EQUIPMENT & REQUIREMENTS LIST */
-                <div className="space-y-4">
-                  <div className="text-center pb-3 border-b border-[#D8C697]">
-                    <h3 className="text-lg sm:text-xl font-heading font-bold text-[#702C38] tracking-wide uppercase">
-                      Hogwarts School of Codecraft & Wizardry
-                    </h3>
-                    <div className="text-xs font-heading font-semibold text-[#526746]">
-                      UNIFORM & EQUIPMENT LIST (GM MERCULLO CHAPTER)
-                    </div>
-                  </div>
-
-                  <div className="space-y-3 font-heading text-[#114522] text-sm">
-                    <p className="font-bold text-sm uppercase tracking-wider text-[#702C38]">
-                      Visitors & Tech Scouts will require:
-                    </p>
-                    
-                    <ul className="space-y-2 pl-2">
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-[#526746] shrink-0 mt-0.5" />
-                        <span><strong>1. One (1) Inquisitive Mind:</strong> Curiosity for how software, networking protocols, and security systems operate under the hood.</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-[#526746] shrink-0 mt-0.5" />
-                        <span><strong>2. One (1) Standard Terminal Shell:</strong> Bash, Zsh, or any modern web browser to inspect running applications.</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-[#526746] shrink-0 mt-0.5" />
-                        <span><strong>3. One (1) Appreciation for Low-Level Logic:</strong> Subnetting calculations (CIDR/VLSM), OSI 7-Layer encapsulation, and socket pipelines.</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-[#526746] shrink-0 mt-0.5" />
-                        <span><strong>4. One (1) Verified GitHub Account:</strong> To inspect source repositories, clone codebases, or submit pull requests.</span>
-                      </li>
-                    </ul>
-
-                    <div className="p-3 rounded-xl bg-[#E8D9AE] border border-[#B49A62] text-xs font-sans text-[#302B22]">
-                      <span className="font-heading font-bold text-[#702C38] block mb-0.5">Note on Permitted Companions:</span>
-                      Visitors may also bring an Owl (<a href="mailto:gmmercullo99@gmail.com" className="underline font-semibold">gmmercullo99@gmail.com</a>), a LinkedIn endorsement, or an inquiry for collaboration.
-                    </div>
-                  </div>
-                </div>
-              )}
-
+        <section
+          className={`full-letter-stage${isLetterVisible ? ' is-visible' : ''}`}
+          aria-label="Hogwarts Acceptance Letter"
+          aria-hidden={!isLetterVisible}
+        >
+          <article className="letter-sheet parchment-aged-letter">
+            <div className="letter-crest">
+              <Crest />
             </div>
 
-            {/* Bottom Actions Bar */}
-            <div className="pt-4 border-t border-[#D8C697] flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
-              <span className="text-xs font-decorative italic text-[#75664B] hidden sm:inline">
-                "Platform 9¾ awaits your departure."
-              </span>
-
-              <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-                <button
-                  type="button"
-                  onClick={onSkip}
-                  className="px-4 py-2 rounded-xl bg-transparent border border-[#B49A62] hover:bg-black/5 text-[#302B22] font-heading font-semibold text-xs transition-colors"
-                >
-                  Close Letter
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleEnterPortfolio}
-                  className="px-6 py-2.5 rounded-xl bg-[#702C38] hover:bg-[#8A3645] text-[#F4E9C8] font-heading font-bold text-xs tracking-wider shadow flex items-center justify-center gap-2 transition-all transform hover:scale-105"
-                >
-                  <span>Step Onto Platform 9¾ (Enter Portfolio)</span>
-                  <ArrowRight className="w-4 h-4 text-[#B49A62]" />
-                </button>
+            <div className="letter-address typewriter-text">
+              <strong>To:</strong>
+              <div>
+                <p>Esteemed Visitor,</p>
+                <p>The Glowing Screen by the Desk,</p>
+                <p>Port 443, The Digital Realm,</p>
+                <p>Worldwide Web.</p>
               </div>
             </div>
 
-          </div>
-        )}
+            <h2 className="letter-salutation emerald-calligraphy">
+              Dear Esteemed Visitor,
+            </h2>
 
+            <div className="letter-body typewriter-text">
+              <p>
+                I am pleased to invite you to explore my portfolio of Software
+                Development, Networking, and Cybersecurity.
+              </p>
+              <p>
+                Visitors shall be granted full passage to inspect crafted
+                applications, resilient network architectures, and
+                security-minded systems built with precision.
+              </p>
+              <p>
+                Please give your attention to the projects, technical skills,
+                and engineering credentials archived within.
+              </p>
+              <p>
+                I look forward to welcoming you into the Great Hall of my
+                digital domain.
+              </p>
+            </div>
+
+            <div className="letter-signature">
+              <p className="typewriter-text">
+                Draco Dormiens Nunquam Titillandus
+              </p>
+              <p className="typewriter-text">Sincerely,</p>
+              <p className="signature-name emerald-calligraphy">GM Mercullo</p>
+              <p className="typewriter-text">
+                Software Developer <span>•</span> Network &amp; Security
+                Engineer
+              </p>
+            </div>
+
+            <div className="letter-actions">
+              <button
+                type="button"
+                className="great-hall-button"
+                onClick={enterPortfolio}
+              >
+                Accept the Invitation
+              </button>
+              <button
+                type="button"
+                className="replay-envelope-button"
+                onClick={replayEnvelope}
+              >
+                <span aria-hidden="true">↻</span> Replay the Envelope
+              </button>
+            </div>
+          </article>
+        </section>
       </div>
     </div>
   );
 };
+
+const Crest: React.FC<{ className?: string }> = ({ className }) => (
+  <svg
+    className={className}
+    viewBox="0 0 120 132"
+    fill="none"
+    aria-hidden="true"
+  >
+    <path
+      d="M22 18 Q60 5 98 18 L93 28 Q60 18 27 28 Z"
+      fill="#efe2c4"
+      stroke="currentColor"
+      strokeWidth="2"
+    />
+    <text
+      x="60"
+      y="21"
+      textAnchor="middle"
+      fill="currentColor"
+      fontFamily="Cinzel, serif"
+      fontSize="7"
+      fontWeight="800"
+      letterSpacing="1.2"
+    >
+      HOGWARTS
+    </text>
+    <path
+      d="M34 30 60 25 86 30 V70 C86 91 73 104 60 112 47 104 34 91 34 70 Z"
+      fill="#efe2c4"
+      stroke="currentColor"
+      strokeWidth="2.5"
+    />
+    <path d="M60 27 V107 M35 68 H85" stroke="currentColor" strokeWidth="1.8" />
+    <path
+      d="M42 42c8-8 15 1 8 9l-7 5-4-7zM69 43c11-5 12 6 2 9s-4 12 7 9M41 78c8-6 15 0 14 8l-9 5-7-5zM72 77l10 5-8 5 4 9-10-4-7 5 2-10-5-5z"
+      fill="currentColor"
+    />
+    <rect
+      x="51"
+      y="58"
+      width="18"
+      height="21"
+      rx="2"
+      fill="#f7eed8"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    />
+    <text
+      x="60"
+      y="74"
+      textAnchor="middle"
+      fill="currentColor"
+      fontFamily="Cinzel, serif"
+      fontSize="15"
+      fontWeight="900"
+    >
+      H
+    </text>
+    <path
+      d="M23 97 Q60 126 97 97 L101 106 Q60 137 19 106 Z"
+      fill="#efe2c4"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    />
+  </svg>
+);
+
+const WaxSeal: React.FC = () => (
+  <svg viewBox="0 0 120 120" className="wax-seal-art" aria-hidden="true">
+    <defs>
+      <radialGradient id="invitation-wax-body" cx="38%" cy="32%" r="68%">
+        <stop offset="0%" stopColor="#c9222c" />
+        <stop offset="48%" stopColor="#961119" />
+        <stop offset="85%" stopColor="#69080e" />
+        <stop offset="100%" stopColor="#470408" />
+      </radialGradient>
+      <radialGradient id="invitation-wax-rim" cx="65%" cy="70%" r="65%">
+        <stop offset="0%" stopColor="#b81a24" />
+        <stop offset="100%" stopColor="#5c060b" />
+      </radialGradient>
+    </defs>
+    <path
+      d="M60 6C73 5 86 11 96 19c10 8 19 20 18 34-1 13 3 26-5 38s-21 21-35 23-28 1-40-6S11 90 9 76 8 47 15 34 34 12 47 8c5-2 9-2 13-2Z"
+      fill="url(#invitation-wax-body)"
+      stroke="#470408"
+      strokeWidth="1.5"
+    />
+    <path
+      d="M24 28c10-12 26-17 42-15s29 10 36 23"
+      stroke="rgba(255,175,180,.38)"
+      strokeWidth="3"
+      strokeLinecap="round"
+    />
+    <circle
+      cx="60"
+      cy="60"
+      r="37"
+      fill="url(#invitation-wax-rim)"
+      stroke="#4d0509"
+      strokeWidth="2.5"
+    />
+    <circle
+      cx="60"
+      cy="60"
+      r="33"
+      fill="none"
+      stroke="rgba(255,140,148,.24)"
+      strokeWidth="1.2"
+    />
+    <path
+      d="M44 41 60 36l16 5v22c0 13-8 21-16 26-8-5-16-13-16-26Z"
+      fill="none"
+      stroke="#450307"
+      strokeWidth="2.2"
+    />
+    <text
+      x="60"
+      y="70"
+      textAnchor="middle"
+      fill="#470408"
+      fontFamily="Cinzel, serif"
+      fontSize="28"
+      fontWeight="900"
+    >
+      H
+    </text>
+  </svg>
+);
